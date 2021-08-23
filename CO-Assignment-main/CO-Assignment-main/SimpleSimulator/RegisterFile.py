@@ -18,6 +18,7 @@ class RegisterFile:
 		self.reg_val = {
 			"R0" : 0, "R1" : 0, "R2" : 0, "R3" : 0, "R4" : 0, "R5" : 0, "R6" : 0, "FLAGS" : "0000000000000000"
 		}
+		self.flagval = "0000000000000000"
 	def getFLAGS(self):
 		return self.reg_val["FLAGS"]
 
@@ -32,13 +33,12 @@ class RegisterFile:
 			return "D"
 		elif inst in ["jmp", "jlt", "jgt", "je"]:
 			return "E"
-		elif inst == "hlt":
+		else:
 			return "F"
 
 	def update(self, inst):
 		inst_op = ins.op_codes[inst[:5]]
-		inst_type = get_inst_type(inst_op)
-
+		inst_type = RegisterFile().get_inst_type(inst_op)
 		if inst_type == "A":
 			reg_1 = inst[7:10]
 			reg_2 = inst[10:13]
@@ -89,7 +89,10 @@ class RegisterFile:
 			reg_2 = inst[13:16]
 
 			if inst_op == "mov_reg":
-				self.reg_val[reg_addr[reg_1]] = self.reg_val[reg_addr[reg_2]]
+				if inst[13:16] == "111":
+					self.reg_val[reg_addr[reg_1]] = int(self.flagval, 2)
+				else:
+					self.reg_val[reg_addr[reg_1]] = self.reg_val[reg_addr[reg_2]]
 			elif inst_op == "div":
 				# Division by zero to be handled?
 				self.reg_val["R0"] = self.reg_val[reg_addr[reg_1]] // self.reg_val[reg_addr[reg_2]]
@@ -103,10 +106,10 @@ class RegisterFile:
 					self.reg_val["FLAGS"] = "0000000000000010"
 				elif self.reg_val[reg_addr[reg_1]] == self.reg_val[reg_addr[reg_2]]:
 					self.reg_val["FLAGS"] = "0000000000000001" 	
-
+				self.flagval = self.reg_val["FLAGS"]
 		elif inst_type == "D":
 			reg = inst[5:8]
-			var = inst[8:16]
+			var = int(inst[8:16], 2)
 
 			if inst_op == "ld":
 				self.reg_val[reg_addr[reg]] = memory.get_var(var)	# get_var(var) --> gets the address of var 
@@ -118,6 +121,12 @@ class RegisterFile:
 	def dump(self):
 		for reg in self.reg_val.keys():
 			if reg != "FLAGS":
-				print(bin(self.reg_val[reg])[2:])
+				print((bin(self.reg_val[reg])[2:]).rjust(16, '0'), end=" ")
 			else:
 				print(self.reg_val["FLAGS"])
+
+	def get_mem(self):
+		return memory
+
+	def resFlag(self):
+		self.reg_val["FLAGS"] = "0000000000000000"

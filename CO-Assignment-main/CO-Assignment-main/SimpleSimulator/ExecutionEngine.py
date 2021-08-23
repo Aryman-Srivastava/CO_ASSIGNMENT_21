@@ -1,22 +1,18 @@
 # Execution Engine
 import RegisterFile as RF
-import Memory as Mem
 import ProgramCounter as pc
+from instruction import op_codes
 
-class ExecutionEngine:
- 
-	# self.rf and rf will have different values
-	# suggestion: make dump() in ExecutionEngine 
+class ExecutionEngine: 
 
-	def __init__(self, rf, mem, PC):
+	def __init__(self, rf, pc):
 		self.rf = rf
-		self.mem = mem
 		self.PC = pc
 		self.halted = False
 		self.next_pc = 0
 
 	def execute(self, inst, cycle):
-		inst_type = self.rf.get_inst_type(inst)
+		inst_type = self.rf.get_inst_type(op_codes[inst[:5]])
 		if inst_type in ["A", "B", "C", "D"]:
 			self.rf.update(inst)
 			self.PC.update(self.PC.getVal() + 1)
@@ -45,7 +41,8 @@ class ExecutionEngine:
 					self.PC.update(self.next_pc)
 				else:
 					self.PC.update(self.PC.getVal() + 1)
-		elif inst_type == "F":
+		else:
+			self.PC.update(self.PC.getVal() + 1)
 			self.halted = True
 		
 		return self.halted, self.next_pc 
