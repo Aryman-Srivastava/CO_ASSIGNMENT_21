@@ -1,5 +1,4 @@
 # main_file
-
 import os
 #
 #
@@ -24,7 +23,7 @@ def main():
         cycle += 1
 
     memory.dump()
-    # memory.show_traces()
+    memory.show_traces()
 
 
 if __name__ == '__main__':

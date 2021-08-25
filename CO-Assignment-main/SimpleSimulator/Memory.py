@@ -1,5 +1,5 @@
 # Mem
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 class Memory:
 	
@@ -23,9 +23,16 @@ class Memory:
 		self.mem_dict[var] = (bin(reg_val)[2:]).rjust(16, '0')
 
 	def fetch(self, PC, cycle):
-		self.x.append(cycle)
-		self.y.append(PC)
-		return self.mem_dict[PC]
+        	if self.mem_dict[PC][:5] in ['00100', '00101']:
+            		# self.y.append([PC, int(self.mem_dict[PC][8:16], 2)])
+            		self.x.append(cycle)
+            		self.x.append(cycle)
+            		self.y.append(PC)
+            		self.y.append(int(self.mem_dict[PC][8:16], 2))
+        	else:
+            		self.y.append(PC)
+            		self.x.append(cycle)
+        	return self.mem_dict[PC]
 
 	def dump(self):
 		for i in range(256):
@@ -34,6 +41,6 @@ class Memory:
 			else:
 				print(self.mem_dict[i])
 
-	# def show_traces(self):
-	# 	plt.scatter(self.x, self.y)
-	# 	plt.show()
+	def show_traces(self):
+		plt.scatter(self.x, self.y)
+		plt.savefig('pattern.png')
